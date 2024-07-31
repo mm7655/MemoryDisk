@@ -125,15 +125,16 @@ struct MEMORY_BLOCK next_fit_allocate(int request_size, struct MEMORY_BLOCK memo
                 // Update the allocated block with the new ending address and size
                 allocated_block.end_address = allocated_block.start_address + request_size - 1;
                 allocated_block.segment_size = request_size;
+
                 // Shift memory map and insert the new block
                 for (int j = *map_cnt; j > i + 1; j--) {
                     memory_map[j] = memory_map[j - 1];
                 }
                 memory_map[i + 1] = new_block;
                 (*map_cnt)++;
-            }
-            allocated_block.process_id = process_id;
-            return allocated_block;
+            } 
+            allocated_block.process_id = process_id; // Move this line outside the if-block
+            return allocated_block; 
         }
     }
 
@@ -144,4 +145,21 @@ struct MEMORY_BLOCK next_fit_allocate(int request_size, struct MEMORY_BLOCK memo
             if (allocated_block.segment_size > request_size) { // Split if needed
                 // Create a new memory block for the remaining space after allocation
                 struct MEMORY_BLOCK new_block = {allocated_block.start_address + request_size, allocated_block.end_address, allocated_block.segment_size - request_size, 0};
-                //
+                // Update the allocated block with the new ending address and size
+                allocated_block.end_address = allocated_block.start_address + request_size - 1;
+                allocated_block.segment_size = request_size;
+
+                // Shift memory map and insert the new block
+                for (int j = *map_cnt; j > i + 1; j--) {
+                    memory_map[j] = memory_map[j - 1];
+                }
+                memory_map[i + 1] = new_block;
+                (*map_cnt)++;
+            }
+            allocated_block.process_id = process_id; // Move this line outside the if-block
+            return allocated_block;
+        }
+    }
+
+    return (struct MEMORY_BLOCK) {-1, -1, -1, -1}; // NULLBLOCK if no fit is found
+}
