@@ -1,6 +1,8 @@
 #include "oslabs.h"
 #include <limits.h>
 
+struct MEMORY_BLOCK NULLBLOCK = {0, 0, 0, 0};
+
 // Best-Fit Allocation
 struct MEMORY_BLOCK best_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX], int *map_cnt, int process_id) {
     int best_index = -1;
