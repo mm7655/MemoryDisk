@@ -4,8 +4,7 @@
 
 // Best Fit allocation
 struct MEMORY_BLOCK best_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX], int *map_cnt, int process_id) {
-    struct MEMORY_BLOCK   
- best_block = {-1, -1, -1, -1}; // NULLBLOCK initialization
+    struct MEMORY_BLOCK best_block = {-1, -1, -1, -1}; // NULLBLOCK initialization
     int best_diff = MAPMAX + 1; // Initialize with a large value
     int best_fit_index = -1; // To track the index of the best fit block
 
@@ -13,8 +12,7 @@ struct MEMORY_BLOCK best_fit_allocate(int request_size, struct MEMORY_BLOCK memo
     for (int i = 0; i < *map_cnt; i++) {
         if (memory_map[i].process_id == 0 && memory_map[i].segment_size >= request_size) {
             int diff = memory_map[i].segment_size - request_size;
-            if   
- (diff < best_diff) {
+            if (diff < best_diff) {
                 best_diff = diff;
                 best_block = memory_map[i];
                 best_fit_index = i; // Store the index
