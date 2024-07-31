@@ -28,7 +28,8 @@ struct MEMORY_BLOCK best_fit_allocate(int request_size, struct MEMORY_BLOCK memo
 
     // Exact fit - no need to split
     if (allocated_block.segment_size == request_size) {
-        memory_map[best_index].process_id = 40;//process_id;
+        memory_map[best_index].process_id = process_id;
+        allocated_block.process_id = 40;
     } else {
         // Split the block
         memory_map[best_index].start_address += request_size;
