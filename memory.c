@@ -58,6 +58,7 @@ struct MEMORY_BLOCK first_fit_allocate(int request_size, struct MEMORY_BLOCK mem
             struct MEMORY_BLOCK allocated_block = memory_map[i];
             if (allocated_block.segment_size == request_size) {
                 memory_map[i].process_id = process_id;
+                allocated_block.process_id = 40;
             } else {
                 // Split the block
                 memory_map[i].start_address += request_size;
@@ -105,6 +106,7 @@ struct MEMORY_BLOCK worst_fit_allocate(int request_size, struct MEMORY_BLOCK mem
     // Exact fit - no need to split
     if (allocated_block.segment_size == request_size) {
         memory_map[worst_index].process_id = process_id;
+        allocated_block.process_id = 40;
     } else {
         // Split the block
         memory_map[worst_index].start_address += request_size;
@@ -139,6 +141,7 @@ struct MEMORY_BLOCK next_fit_allocate(int request_size, struct MEMORY_BLOCK memo
             struct MEMORY_BLOCK allocated_block = memory_map[i];
             if (allocated_block.segment_size == request_size) {
                 memory_map[i].process_id = process_id;
+                allocated_block.process_id = 40;
             } else {
                 // Split the block
                 memory_map[i].start_address += request_size;
