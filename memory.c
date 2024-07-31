@@ -2,29 +2,39 @@
 #include <stdlib.h>
 #include "oslabs.h"
 
-// Best Fit allocation
 struct MEMORY_BLOCK best_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX], int *map_cnt, int process_id) {
-    struct MEMORY_BLOCK best_block = {-1, -1, -1, -1};
-    int best_diff = MAPMAX + 1;
-    int best_fit_index = -1;
+    struct MEMORY_BLOCK best_block = {-1, -1, -1, -1}; // NULLBLOCK initialization
+    int best_diff = MAPMAX + 1; // Initialize with a large value
+    int best_fit_index = -1;    // Initialize with an invalid index
 
+    // Find the best fit block
     for (int i = 0; i < *map_cnt; i++) {
+        // Check if the block is free and large enough
         if (memory_map[i].process_id == 0 && memory_map[i].segment_size >= request_size) {
+            // Calculate the difference in size between the block and the request
             int diff = memory_map[i].segment_size - request_size;
+
+            // Update best_block and best_fit_index if this is a better fit
             if (diff < best_diff) {
                 best_diff = diff;
-                best_block = memory_map[i];
-                best_fit_index = i;
+                best_block = memory_map[i]; // Found a potential fit, copy the block
+                best_fit_index = i;        // Keep track of the index for splitting
             }
         }
     }
 
-    if (best_block.start_address != -1) {
-        if (best_diff > 0) {
-            struct MEMORY_BLOCK new_block = {best_block.start_address + request_size,
-                                             best_block.end_address,
-                                             best_diff,
-                                             0};
+    // Allocate and split if necessary
+    if (best_fit_index != -1) { // If we found a suitable block
+        if (best_diff > 0) { // If the block is larger than the request, split it
+            // Create a new memory block for the remaining space after allocation
+            struct MEMORY_BLOCK new_block = {
+                best_block.start_address + request_size, // Start after the allocated block
+                best_block.end_address,                  // End address remains the same
+                best_diff,                               // Size is the remaining space
+                0                                       // New block is free
+            };
+
+            // Update the allocated block's end address and size
             best_block.end_address = best_block.start_address + request_size - 1;
             best_block.segment_size = request_size;
 
@@ -32,9 +42,11 @@ struct MEMORY_BLOCK best_fit_allocate(int request_size, struct MEMORY_BLOCK memo
             for (int j = *map_cnt; j > best_fit_index + 1; j--) {
                 memory_map[j] = memory_map[j - 1];
             }
-            memory_map[best_fit_index + 1] = new_block;
-            (*map_cnt)++; 
+            memory_map[best_fit_index + 1] = new_block; // Insert the new block right after the allocated one
+            (*map_cnt)++;                               // Increment the number of blocks
         }
+
+        // Mark the allocated block with the process_id
         best_block.process_id = process_id;
     }
     return best_block;
