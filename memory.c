@@ -69,37 +69,43 @@ struct MEMORY_BLOCK first_fit_allocate(int request_size, struct MEMORY_BLOCK mem
 
 // Worst Fit allocation
 struct MEMORY_BLOCK worst_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX], int *map_cnt, int process_id) {
-    struct MEMORY_BLOCK worst_block = {-1, -1, -1, -1}; 
+    struct MEMORY_BLOCK worst_block = {-1, -1, -1, -1}; // NULLBLOCK initialization
     int worst_diff = -1; 
+    int worst_fit_index = -1; // To track the index of the worst fit block
 
+    // Find the worst fit block
     for (int i = 0; i < *map_cnt; i++) {
         if (memory_map[i].process_id == 0 && memory_map[i].segment_size >= request_size) {
             int diff = memory_map[i].segment_size - request_size;
             if (diff > worst_diff) {
                 worst_diff = diff;
                 worst_block = memory_map[i];
+                worst_fit_index = i;
             }
         }
     }
 
+    // Allocate and split if necessary
     if (worst_block.start_address != -1) {
-        if (worst_diff > 0) { 
-            // Create a new memory block for the remaining space after allocation and insertion
+        if (worst_diff > 0) {
+            // Create a new memory block for the remaining space after allocation
             struct MEMORY_BLOCK new_block = {worst_block.start_address + request_size, worst_block.end_address, worst_diff, 0};
             // Update the allocated block with the new ending address and size
             worst_block.end_address = worst_block.start_address + request_size - 1;
             worst_block.segment_size = request_size;
 
-            for (int j = *map_cnt; j > i + 1; j--) {
+            // Shift memory map and insert the new block
+            for (int j = *map_cnt; j > worst_fit_index + 1; j--) { // Use the stored index
                 memory_map[j] = memory_map[j - 1];
             }
-            memory_map[i + 1] = new_block;
+            memory_map[worst_fit_index + 1] = new_block;
             (*map_cnt)++; 
         }
         worst_block.process_id = process_id;
     }
     return worst_block;
 }
+
 
 // Next Fit allocation
 struct MEMORY_BLOCK next_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX], int *map_cnt, int process_id, int last_address) {
