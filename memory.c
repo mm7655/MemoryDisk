@@ -47,7 +47,7 @@ struct MEMORY_BLOCK first_fit_allocate(int request_size, struct MEMORY_BLOCK mem
         if (memory_map[i].process_id == 0 && memory_map[i].segment_size >= request_size) {
             struct MEMORY_BLOCK allocated_block = memory_map[i];
             if (allocated_block.segment_size > request_size) { // Split if needed
-                // Create a new memory block for the remaining space after allocation and insertion
+                // Create a new memory block for the remaining space after allocation
                 struct MEMORY_BLOCK new_block = {allocated_block.start_address + request_size, allocated_block.end_address, allocated_block.segment_size - request_size, 0};
                 // Update the allocated block with the new ending address and size
                 allocated_block.end_address = allocated_block.start_address + request_size - 1;
@@ -106,7 +106,6 @@ struct MEMORY_BLOCK worst_fit_allocate(int request_size, struct MEMORY_BLOCK mem
     return worst_block;
 }
 
-
 // Next Fit allocation
 struct MEMORY_BLOCK next_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX], int *map_cnt, int process_id, int last_address) {
     int start_index = 0; // Start searching from the beginning if last_address is invalid
@@ -126,7 +125,6 @@ struct MEMORY_BLOCK next_fit_allocate(int request_size, struct MEMORY_BLOCK memo
                 // Update the allocated block with the new ending address and size
                 allocated_block.end_address = allocated_block.start_address + request_size - 1;
                 allocated_block.segment_size = request_size;
-
                 // Shift memory map and insert the new block
                 for (int j = *map_cnt; j > i + 1; j--) {
                     memory_map[j] = memory_map[j - 1];
@@ -138,30 +136,12 @@ struct MEMORY_BLOCK next_fit_allocate(int request_size, struct MEMORY_BLOCK memo
             return allocated_block;
         }
     }
-    
-    // Wrap around to the beginning and search from there until the start_index
+
+    //wrap around
     for (int i = 0; i < start_index; i++) {
         if (memory_map[i].process_id == 0 && memory_map[i].segment_size >= request_size) {
             struct MEMORY_BLOCK allocated_block = memory_map[i];
             if (allocated_block.segment_size > request_size) { // Split if needed
                 // Create a new memory block for the remaining space after allocation
                 struct MEMORY_BLOCK new_block = {allocated_block.start_address + request_size, allocated_block.end_address, allocated_block.segment_size - request_size, 0};
-                // Update the allocated block with the new ending address and size
-                allocated_block.end_address = allocated_block.start_address + request_size - 1;
-                allocated_block.segment_size = request_size;
-
-                // Shift memory map and insert the new block
-                for (int j = *map_cnt; j > i + 1; j--) {
-                    memory_map[j] = memory_map[j - 1];
-                }
-                memory_map[i + 1] = new_block;
-                (*map_cnt)++;
-            }
-            allocated_block.process_id = process_id;
-            return allocated_block;
-        }
-    }
-    
-    return (struct MEMORY_BLOCK) {-1, -1, -1, -1}; // NULLBLOCK if no fit is found
-}
-
+                //
